@@ -1,208 +1,144 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, NavLink, useLocation } from "react-router-dom";
 import Character from "./Pages/Character";
 import Weapon from "./Pages/Weapon";
 import TierList from "./Pages/TierList";
+import Login from "./Pages/Login";
+import Forum from "./Pages/Forum";
 import "./App.css";
 
-function App() {
-const [showLogin, setShowLogin] = useState(false);
-const [comments, setComments] = useState([]);
-const [newComment, setNewComment] = useState("");
-const [nickname, setNickname] = useState("");
-const [editIndex, setEditIndex] = useState(null);
-const [editText, setEditText] = useState("");
+function AppContent() {
+  const [user, setUser] = useState(null);
 
-const handleAddComment = () => {
-if (nickname.trim() && newComment.trim()) {
-setComments([...comments, { nickname, text: newComment }]);
-setNewComment("");
-}
-};
+  const [comments, setComments] = useState([]);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
-const openEditModal = (index) => {
-setEditIndex(index);
-setEditText(comments[index].text);
-};
+  const location = useLocation();
 
-const handleSaveEdit = () => {
-const updatedComments = [...comments];
-updatedComments[editIndex].text = editText;
-setComments(updatedComments);
-closeEditModal();
-};
+  // Jika user membuka /forum tanpa login → muncul popup
+  useEffect(() => {
+    if (location.pathname === "/forum" && !user) {
+      setShowLoginPopup(true);
+    } else {
+      setShowLoginPopup(false);
+    }
+  }, [location, user]);
 
-const closeEditModal = () => {
-setEditIndex(null);
-setEditText("");
-};
+  return (
+    <div>
+      {/* === POPUP LOGIN REQUIRED === */}
+      {showLoginPopup && (
+        <div className="forum-popup-overlay">
+          <div className="forum-popup-box">
+            <h2>Community Discussion</h2>
+            <p>You must Login to join the discussion</p>
 
-const handleDeleteComment = (index) => {
-setComments(comments.filter((_, i) => i !== index));
-};
+            <NavLink to="/login" className="forum-popup-btn">
+              Go to Login
+            </NavLink>
 
-return ( <BrowserRouter> 
-<div>
-     <nav className="navbar"> <ul className="nav-left"> <li> <NavLink to="/" className="nav-itemLeft">HOME </NavLink> </li> </ul>
-      <ul className="nav-right">
-        <li>
-          <NavLink to="/character" className="nav-item">
-            CHARACTER
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/weapon" className="nav-item">
-            WEAPON
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/tierlist" className="nav-item">
-            TIER LIST
-          </NavLink>
-        </li>
-        <button className="tierlist-btn" onClick={() => setShowLogin(true)}>
-          LOGIN
-        </button>
-      </ul>
-    </nav>
-
-    {/* LOGIN */}
-    {showLogin && (
-      <div className="login-overlay">
-        <div className="login-container">
-          <span className="close-login" onClick={() => setShowLogin(false)}>
-            ×
-          </span>
-          <h2>Login</h2>
-          <input
-            type="text"
-            placeholder="Username"
-            className="login-input"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="login-input"
-          />
-          <button className="tierlist-btn">Sign In</button>
+            <button
+              className="forum-popup-close"
+              onClick={() => setShowLoginPopup(false)}
+            >
+              ×
+            </button>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {/* EDIT COMMENT */}
-    {editIndex !== null && (
-      <div className="login-overlay">
-        <div className="login-container">
-          <span className="close-login" onClick={closeEditModal}>
-            ×
-          </span>
-          <h2>Edit Comment</h2>
-          <textarea
-            className="login-input"
-            rows="4"
-            value={editText}
-            onChange={(e) => setEditText(e.target.value)}
-          />
-          <button className="tierlist-btn" onClick={handleSaveEdit}>
-            Save Changes
-          </button>
-        </div>
-      </div>
-    )}
+      {/* === NAVBAR === */}
+      <nav className="navbar">
+        <ul className="nav-left">
+          <li>
+            <NavLink to="/" className="nav-itemLeft">
+              HOME
+            </NavLink>
+          </li>
+        </ul>
 
-    {/* ROUTES */}
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <main className="content-container">
-            <div className="content-box" style={{ marginTop: "4rem" }}>
-              <img
-                src="/GenshinImpactLogo.png"
-                alt="Logo"
-                className="content-logo"
-              />
-              <h1>Genshin Impact</h1>
-              <p>
-                Welcome to the Genshin Impact Wiki — a comprehensive
-                fan-made database dedicated to miHoYo's open-world action
-                RPG. Set in the breathtaking world of Teyvat, Genshin Impact
-                allows players to embark on an epic journey across seven
-                nations, each ruled by a different elemental Archon.
-              </p>
-            </div>
+        <ul className="nav-right">
+          <li>
+            <NavLink to="/character" className="nav-item">
+              CHARACTER
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/weapon" className="nav-item">
+              WEAPON
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/tierlist" className="nav-item">
+              TIER LIST
+            </NavLink>
+          </li>
 
-            {/* FORUM SECTION */}
-            <section className="content-box forum-section">
-              <h2 className="forum-title">Community Discussion</h2>
+          {!user ? (
+            <NavLink to="/login" className="login-btn">LOGIN</NavLink>
+          ) : (
+            <span className="login-btn">{user.username}</span>
+          )}
+        </ul>
+      </nav>
 
-              <div className="forum-input-area">
-                <input
-                  type="text"
-                  placeholder="Enter your nickname"
-                  className="forum-nickname-input"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                />
-                <textarea
-                  placeholder="Share your thoughts..."
-                  className="forum-textarea"
-                  rows="3"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                />
-                <button
-                  onClick={handleAddComment}
-                  className="tierlist-btn"
-                >
-                  Post
-                </button>
+      {/* === ROUTES === */}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <main className="content-container">
+              <div className="content-box" style={{ marginTop: "4rem" }}>
+                <img src="/GenshinImpactLogo.png" alt="Logo" className="content-logo" />
+                <h1>Genshin Impact</h1>
+                <p>
+                  Welcome to the Genshin Impact Wiki — a comprehensive fan-made
+                  database dedicated to miHoYo's open-world action RPG.
+                </p>
               </div>
 
-              <div className="forum-comments">
-                {comments.map((c, index) => (
-                  <div key={index} className="comment">
-                    <div className="comment-right">
-                      <strong className="comment-nickname">
-                        {c.nickname}
-                      </strong>
-                      <p className="comment-meta">Posted just now</p>
-                      <p className="comment-text">{c.text}</p>
+              <section className="content-box forum-section">
+                <NavLink to="/forum" className="tierlist-btn">
+                  Join Community Discussion
+                </NavLink>
+              </section>
+            </main>
+          }
+        />
 
-                      <div className="comment-actions">
-                        <button onClick={() => openEditModal(index)}>
-                          Edit
-                        </button>
-                        <button onClick={() => handleDeleteComment(index)}>
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </main>
-        }
-      />
+        <Route path="/character" element={<Character />} />
+        <Route path="/weapon" element={<Weapon />} />
+        <Route path="/tierlist" element={<TierList />} />
+        <Route path="/login" element={<Login setUser={setUser} />} />
 
-      <Route path="/character" element={<Character />} />
-      <Route path="/weapon" element={<Weapon />} />
-      <Route path="/tierlist" element={<TierList />} />
-    </Routes>
+        {/* Forum akan tetap dirender, tapi diblokir oleh popup */}
+        <Route
+          path="/forum"
+          element={
+            <Forum
+              user={user}
+              comments={comments}
+              setComments={setComments}
+            />
+          }
+        />
+      </Routes>
 
-    <footer className="solid-section">
-      <p>
-        Welcome to the Genshin Impact Wiki Fandom! A fan site where you can
-        explore characters, stories, and guides from the Genshin Impact
-        game.
-      </p>
-    </footer>
-</div>
-</BrowserRouter>
-
-
-);
+      {/* === FOOTER === */}
+      <footer className="solid-section">
+        <p>
+          Welcome to the Genshin Impact Wiki Fandom! Explore characters,
+          stories, and guides from Genshin Impact.
+        </p>
+      </footer>
+    </div>
+  );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}
