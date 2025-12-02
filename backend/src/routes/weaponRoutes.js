@@ -4,37 +4,53 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// GET all
+// --- FITUR AKTIF: READ ---
 router.get("/", async (req, res) => {
   const list = await Weapon.findAll();
-  return res.json(list);
+  res.json(list);
 });
 
-// GET by id
 router.get("/:id", async (req, res) => {
-  const w = await Weapon.findByPk(req.params.id);
-  if (!w) return res.status(404).json({ message: "Not found" });
-  return res.json(w);
+  const item = await Weapon.findByPk(req.params.id);
+  if (!item) return res.status(404).json({ message: "Weapon not found" });
+  res.json(item);
 });
 
-// CREATE (protected)
+// --- FITUR AKTIF: CREATE ---
 router.post("/", protect, async (req, res) => {
-  const item = await Weapon.create(req.body);
-  return res.status(201).json(item);
+  try {
+    const created = await Weapon.create(req.body);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// UPDATE (protected)
+
 router.put("/:id", protect, async (req, res) => {
-  const w = await Weapon.findByPk(req.params.id);
-  if (!w) return res.status(404).json({ message: "Not found" });
-  await w.update(req.body);
-  return res.json(w);
+  try {
+    const [updated] = await Weapon.update(req.body, {
+      where: { weapon_id: req.params.id }
+    });
+
+    if (!updated) return res.status(404).json({ message: "Weapon not found" });
+    
+    const item = await Weapon.findByPk(req.params.id);
+    res.json(item);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// DELETE (protected)
 router.delete("/:id", protect, async (req, res) => {
-  await Weapon.destroy({ where: { id: req.params.id } });
-  return res.json({ message: "Deleted" });
+  try {
+    const deleted = await Weapon.destroy({ where: { weapon_id: req.params.id } });
+    if (!deleted) return res.status(404).json({ message: "Weapon not found" });
+    res.json({ message: "Weapon deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
+
 
 export default router;

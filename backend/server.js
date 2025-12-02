@@ -1,28 +1,29 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import dotenv from "dotenv";
 import { sequelize } from "./src/models/index.js";
 
-// Routes
+// Routes Imports
 import authRoutes from "./src/routes/auth.js";
-import weaponRoutes from "./src/routes/weaponRoutes.js";
 import characterRoutes from "./src/routes/characterRoutes.js";
+import weaponRoutes from "./src/routes/weaponRoutes.js";
 import postRoutes from "./src/routes/postRoutes.js";
-import commentRoutes from "./src/routes/comment.js";
+import commentRoutes from "./src/routes/commentRoutes.js";
 
+dotenv.config();
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Register routes
+
+// Register Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/weapons", weaponRoutes);
 app.use("/api/characters", characterRoutes);
+app.use("/api/weapons", weaponRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 
@@ -31,13 +32,13 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, async () => {
   try {
     await sequelize.authenticate();
-    console.log("Connected to PostgreSQL");
-
+    console.log("✅ Connected to PostgreSQL");
+    
+    // Gunakan alter:true untuk menyesuaikan kolom jika ada yang kurang
     await sequelize.sync({ alter: true });
     console.log("📌 Database synced");
   } catch (err) {
-    console.error("Database connection error:", err);
+    console.error("❌ Database connection error:", err);
   }
-
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

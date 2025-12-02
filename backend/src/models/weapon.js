@@ -1,8 +1,17 @@
 export default (sequelize, DataTypes) => {
   return sequelize.define("Weapon", {
-    name: { type: DataTypes.STRING, allowNull: false },
-    damage: { type: DataTypes.INTEGER, allowNull: true },
-    rarity: { type: DataTypes.STRING, allowNull: true },
-    image: { type: DataTypes.STRING, allowNull: true }
+    weapon_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    name: { type: DataTypes.STRING(100), allowNull: false },
+    type: { type: DataTypes.STRING(30), allowNull: false }, // Sesuai SQL
+    rarity: { type: DataTypes.INTEGER, allowNull: false },
+    image: { type: DataTypes.TEXT },
+    desc: {type: DataTypes.TEXT}
+  }, {
+    tableName: 'weapon_list',
+    timestamps: false
   });
 };

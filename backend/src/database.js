@@ -3,12 +3,29 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
+  process.env.PG_DATABASE,   // DB name
+  process.env.PG_USER,       // DB user
+  process.env.PG_PASSWORD,   // DB password
   {
-    host: process.env.DB_HOST,
-    dialect: "mysql",
+    host: process.env.PG_HOST,
+    port: process.env.PG_PORT,
+    dialect: "postgres",
     logging: false,
   }
 );
+
+// const {Pool} =require("pg");
+// const dotenv=require("dotenv");
+// dotenv.config();
+
+// const pool= new Pool[{
+//     user: process.env.PGUSER,
+//     host: process.env.PGHOST,
+//     database: process.env.PGDATABASE,
+//     password: process.env.PGPASSWORD,
+
+//     ssl:{
+//         rejectUnauthorized: false,
+//     },
+// }];
+// module.exports=pool;
