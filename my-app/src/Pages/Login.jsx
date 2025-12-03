@@ -1,23 +1,24 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 
 export default function Login({ setUser }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  if (username.trim() && password.trim()) {
-    setUser({ username }); // SIMPAN SEBAGAI OBJEK
-    navigate("/"); // kembali ke home
-  }
-};
+    if (username.trim() && password.trim()) {
+      setUser({ username }); // Simpan user sebagai object
+      navigate("/"); // kembali ke home
+    }
+  };
 
   return (
     <div className="login-page">
       <div className="login-box">
+
         <h2 className="login-title">Login</h2>
 
         <input
@@ -39,6 +40,16 @@ const handleSubmit = (e) => {
         <button className="sign-in-btn" onClick={handleSubmit}>
           Sign In
         </button>
+
+        {/* ===== REGISTER BUTTON ===== */}
+        <button
+          className="sign-in-btn"   // CSS SAMA DENGAN SIGN IN
+          style={{ marginTop: "10px", background: "#666" }} // sedikit beda agar terlihat tombol lain
+          onClick={() => navigate("/register")}
+        >
+          Register
+        </button>
+
       </div>
     </div>
   );

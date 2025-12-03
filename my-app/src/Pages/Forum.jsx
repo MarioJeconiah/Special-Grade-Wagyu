@@ -1,136 +1,46 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
-export default function Forum({ user, comments, setComments }) {
-  const navigate = useNavigate();
-
-  const [newComment, setNewComment] = useState("");
-  const [page, setPage] = useState(1);
-  const commentsPerPage = 10;
-
-  // EDIT POPUP STATE
-  const [editIndex, setEditIndex] = useState(null);
-  const [editText, setEditText] = useState("");
-
-  const totalPages = Math.ceil(comments.length / commentsPerPage);
-  const currentComments = comments.slice(
-    (page - 1) * commentsPerPage,
-    page * commentsPerPage
-  );
-
-  const addComment = () => {
-    if (newComment.trim()) {
-      setComments([{ nickname: user.username, text: newComment }, ...comments]);
-      setNewComment("");
-      setPage(1);
-    }
-  };
-
-  // OPEN EDIT MODAL
-  const openEditModal = (index) => {
-    setEditIndex(index);
-    setEditText(comments[index].text);
-  };
-
-  // SAVE EDITED COMMENT
-  const saveEdit = () => {
-    const updated = [...comments];
-    updated[editIndex].text = editText;
-    setComments(updated);
-    closeEditModal();
-  };
-
-  const closeEditModal = () => {
-    setEditIndex(null);
-    setEditText("");
-  };
-
-  const deleteComment = (index) => {
-    setComments(comments.filter((_, i) => i !== index));
-  };
-
+export default function Forum({ posts }) {
   return (
     <main className="content-container">
-      <section className="content-box forum-section">
+      <div className="content-box forum-section">
         <h2 className="forum-title">Community Discussion</h2>
 
-        {/* POST INPUT */}
-        <div className="forum-input-area">
-          <textarea
-            className="forum-textarea"
-            rows="3"
-            placeholder="Share your thoughts..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-          />
-          <button className="tierlist-btn" onClick={addComment}>
-            Post
-          </button>
-        </div>
-
-        {/* COMMENT LIST */}
-        <div className="forum-comments">
-          {currentComments.map((c, i) => {
-            const globalIndex = (page - 1) * commentsPerPage + i;
-
-            return (
-              <div key={globalIndex} className="comment">
-                <div className="comment-right">
-                  <strong className="comment-nickname">{c.nickname}</strong>
-                  <p className="comment-meta">Posted just now</p>
-                  <p className="comment-text">{c.text}</p>
-
-                  {/* SHOW ACTION ONLY IF OWNER */}
-                  {user.username === c.nickname && (
-                    <div className="comment-actions">
-                      <button onClick={() => openEditModal(globalIndex)}>Edit</button>
-                      <button onClick={() => deleteComment(globalIndex)}>Delete</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* PAGINATION */}
-        <div className="pagination">
-          <button disabled={page === 1} onClick={() => setPage(page - 1)}>◀</button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              className={page === i + 1 ? "active-page" : ""}
-              onClick={() => setPage(i + 1)}
+        {/* Tombol Buat Post Baru */}
+        <div style={{ marginBottom: "1.5rem" }}> {/* Menggunakan div untuk margin tombol */}
+            <NavLink 
+              to="/forum/create" 
+              className="tierlist-btn" 
             >
-              {i + 1}
-            </button>
-          ))}
-
-          <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>▶</button>
+              Create New Post
+            </NavLink>
         </div>
-      </section>
 
-      {/* ⬇ EDIT COMMENT POPUP (FULL PAGE, TENGAH) */}
-      {editIndex !== null && (
-        <div className="edit-overlay">
-          <div className="edit-modal">
-            <span className="edit-close" onClick={closeEditModal}>×</span>
-            <h2>Edit Comment</h2>
-
-            <textarea
-              className="edit-textarea"
-              rows="4"
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-            />
-
-            <button className="tierlist-btn" onClick={saveEdit}>
-              Save Changes
-            </button>
+        {/* Daftar Postingan */}
+        {posts.length === 0 ? (
+          <p style={{ color: "white", opacity: 0.8 }}>No posts yet. Be the first!</p>
+        ) : (
+          <div className="post-list">
+            {posts.map((post) => (
+              <NavLink
+                key={post.id}
+                to={`/forum/post/${post.id}`}
+                className="post-preview" // Menggunakan class .post-preview
+              >
+                <h3>{post.title}</h3>
+                <p className="post-meta-preview">By {post.author} | Comments: {post.comments.length}</p>
+              </NavLink>
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Pagination (example placeholder) */}
+      <div className="pagination">
+        <button className="active-page">1</button>
+        <button>2</button>
+        <button>3</button>
+      </div>
     </main>
   );
 }

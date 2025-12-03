@@ -9,7 +9,7 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false, // Komentar harus terkait dengan sebuah Post
         references: {
-            model: 'Post', // Nama model yang direferensikan (sesuai definisi Sequelize)
+            model: 'posts', // Nama model yang direferensikan (sesuai definisi Sequelize)
             key: 'post_id' // Nama kolom Primary Key di model Post
         }
     },

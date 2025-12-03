@@ -33,7 +33,7 @@ app.listen(PORT, async () => {
   try {
     await sequelize.authenticate();
     console.log("✅ Connected to PostgreSQL");
-    
+  
     // Gunakan alter:true untuk menyesuaikan kolom jika ada yang kurang
     await sequelize.sync({ alter: true });
     console.log("📌 Database synced");
