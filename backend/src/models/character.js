@@ -6,7 +6,14 @@ export default (sequelize, DataTypes) => {
       autoIncrement: true
     },
     name: { type: DataTypes.STRING(50), allowNull: false },
-    element: { type: DataTypes.STRING(30), allowNull: false },
+    element_id: {  // 🔥 Foreign Key
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "elements",
+        key: "element_id"
+      }
+    },
     weapon: { type: DataTypes.STRING(30), allowNull: false },
     rarity: { type: DataTypes.INTEGER, allowNull: false },
     role: { type: DataTypes.STRING(30) },
