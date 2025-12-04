@@ -1,5 +1,5 @@
-module.exports = (sequelize, DataTypes) => {
-  const Element = sequelize.define("Element", {
+export default (sequelize, DataTypes) => {
+  return sequelize.define("Element", {
     element_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -12,14 +12,12 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
 
-    icon: {
+    element_icon_url: {
       type: DataTypes.TEXT,
       allowNull: true
     }
   }, {
-    tableName: "elements",
+    tableName: "element_icon",
     timestamps: false
   });
-
-  return Element;
 };

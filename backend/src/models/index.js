@@ -5,6 +5,7 @@ import characterModel from "./character.js";
 import weaponModel from "./weapon.js";
 import postModel from "./post.js";
 import commentModel from "./comment.js";
+import elementModel from "./elements.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ export const Character = characterModel(sequelize, DataTypes);
 export const Weapon = weaponModel(sequelize, DataTypes);
 export const Post = postModel(sequelize, DataTypes);
 export const Comment = commentModel(sequelize, DataTypes);
+export const Element = elementModel(sequelize, DataTypes);
 
 // Relasi
 // Note: Sequelize akan otomatis menambahkan kolom user_id ke Post jika belum ada
@@ -38,4 +40,12 @@ Post.hasMany(Comment, {
 User.hasMany(Comment, { foreignKey: "user_id" });
 Comment.belongsTo(User, { foreignKey: "user_id" });
 
-export default { sequelize, User, Character, Weapon, Post, Comment };
+Element.hasMany(Character, {
+  foreignKey: "element_id"
+});
+
+Character.belongsTo(Element, {
+  foreignKey: "element_id"
+});
+
+export default { sequelize, User, Character, Weapon, Post, Comment, Element};

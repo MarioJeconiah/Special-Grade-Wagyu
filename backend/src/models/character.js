@@ -10,7 +10,7 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "elements",
+        model: "element_icon",
         key: "element_id"
       }
     },
