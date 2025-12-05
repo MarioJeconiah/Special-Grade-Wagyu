@@ -11,11 +11,30 @@ import weaponRoutes from "./src/routes/weaponRoutes.js";
 import postRoutes from "./src/routes/postRoutes.js";
 import commentRoutes from "./src/routes/commentRoutes.js";
 
+const allowedOrigins = [
+  'http://localhost:3000', // Jika frontend React berjalan di port 3000
+  'http://localhost:4000', // Port backend lokal
+  'http://localhost:5173', // Port backend lokal
+  'https://nama-proyek-frontend-anda.vercel.app', // GANTI INI dengan domain Vercel frontend Anda
+];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
+};
+// 🔥 AKHIR PERUBAHAN CORS
+
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cors(corsOptions)); // 🔥 Menggunakan konfigurasi yang lebih aman
 app.use(bodyParser.json());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
