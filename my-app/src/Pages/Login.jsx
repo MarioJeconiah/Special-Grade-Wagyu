@@ -56,19 +56,17 @@
 // }
 
 import { useState } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
-
-// Tentukan API Base URL
-const API_URL = "http://localhost:4000/api/auth";
+import { useNavigate } from "react-router-dom";
+import api from "../api/api"; // pastikan path benar
 
 export default function Login({ setUser }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // Tambah state untuk pesan error
-  const [loading, setLoading] = useState(false); // Tambah state untuk loading
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => { // Gunakan async
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -80,35 +78,31 @@ export default function Login({ setUser }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+      const response = await api.post("/auth/login", {
+        username,
+        password,
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
-        // Login berhasil (status 200)
-        // data berisi: { id, username, token }
-        
-        // Simpan token di local storage
-        localStorage.setItem("userToken", data.token);
+      // Simpan token dengan nama yang digunakan axios interceptor
+      localStorage.setItem("token", data.token);
 
-        // Panggil setUser untuk menyimpan info user
-        setUser({ id: data.id, username: data.username, token: data.token });
+      // Simpan info user ke state global
+      setUser({
+        id: data.id,
+        username: data.username,
+        token: data.token,
+      });
 
-        navigate("/"); // kembali ke home
-      } else {
-        // Login gagal (status 400 atau 500)
-        // Tampilkan pesan error dari backend
-        setError(data.message || data.error || "Login failed. Check your credentials.");
-      }
+      navigate("/");
     } catch (err) {
-      setError("Network error or server unreachable.");
       console.error("Login Error:", err);
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Login failed. Check your credentials."
+      );
     } finally {
       setLoading(false);
     }
@@ -119,8 +113,8 @@ export default function Login({ setUser }) {
       <div className="login-box">
 
         <h2 className="login-title">Login</h2>
-        
-        {error && <p style={{ color: "red", marginBottom: "15px" }}>{error}</p>} {/* Tampilkan error */}
+
+        {error && <p style={{ color: "red", marginBottom: "15px" }}>{error}</p>}
 
         <input
           type="text"
@@ -142,15 +136,13 @@ export default function Login({ setUser }) {
           {loading ? "Signing In..." : "Sign In"}
         </button>
 
-        {/* ===== REGISTER BUTTON ===== */}
         <button
-          className="sign-in-btn"   // CSS SAMA DENGAN SIGN IN
-          style={{ marginTop: "10px", background: "#666" }} // sedikit beda agar terlihat tombol lain
+          className="sign-in-btn"
+          style={{ marginTop: "10px"}}
           onClick={() => navigate("/register")}
         >
           Register
         </button>
-
       </div>
     </div>
   );

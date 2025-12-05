@@ -5,6 +5,14 @@ export default (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "users",
+        key: "user_id"
+      }
+    },
     title: { type: DataTypes.STRING(200), allowNull: false },
     content: { type: DataTypes.TEXT, allowNull: false }
   }, {

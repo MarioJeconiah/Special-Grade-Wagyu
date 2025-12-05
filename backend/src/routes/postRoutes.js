@@ -1,17 +1,29 @@
 import express from "express";
-import { Post, Comment, User } from "../models/index.js";
+import db from "../models/index.js";
 import { protect } from "../middleware/authMiddleware.js";
-const router = express.Router();
 
-// Get All Posts (Include User & Comments)
+const router = express.Router();
+const { Post, User, Comment } = db;
+
+// GET all posts
 router.get("/", async (req, res) => {
-  const posts = await Post.findAll({
-    include: [
-        { model: Comment },
-        { model: User, attributes: ['username'] }
-    ]
-  });
-  res.json(posts);
+  try {
+    const posts = await Post.findAll({
+      include: [
+        { model: User, attributes: ["user_id", "username"] },
+        {
+          model: Comment,
+          include: [{ model: User, attributes: ["user_id", "username"] }]
+        }
+      ],
+      order: [["createdAt", "DESC"]]
+    });
+
+    res.json(posts);
+  } catch (err) {
+    console.error("GET /posts error:", err);
+    res.status(500).json({ message: "Failed to get posts" });
+  }
 });
 
 // Create Post
@@ -47,68 +59,58 @@ router.delete("/:id", protect, async (req, res) => {
   }
 });
 
+
+// GET single post
 router.get("/:postId", async (req, res) => {
   try {
-    const postId = parseInt(req.params.postId, 10);
-    if (isNaN(postId)) {
-      return res.status(400).json({ message: "Invalid Post ID format" });
-    }
+    const postId = Number(req.params.postId);
+    if (isNaN(postId)) return res.status(400).json({ message: "Invalid Post ID" });
 
     const post = await Post.findByPk(postId, {
       include: [
+        { model: User, attributes: ["user_id", "username"] },
         {
           model: Comment,
-          include: [
-            {
-              model: User,
-              attributes: ["username"],
-            },
-          ],
-        },
-        {
-          model: User,
-          attributes: ["username"], // user pembuat post
-        },
-      ],
+          include: [{ model: User, attributes: ["user_id", "username"] }]
+        }
+      ]
     });
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
+    if (!post) return res.status(404).json({ message: "Post not found" });
 
     res.json(post);
-  } catch (error) {
+  } catch (err) {
+    console.error("GET /posts/:postId error:", err);
     res.status(500).json({ message: "Failed to get post" });
   }
 });
 
-
-// 🔥 POST comment to a post
-router.post("posts/:postId/comments", protect, async (req, res) => {
+// POST comment
+router.post("/:postId", protect, async (req, res) => {
   try {
-    // Pastikan postId adalah angka
-    const postId = parseInt(req.params.postId, 10);
-    if (isNaN(postId)) {
-      return res.status(400).json({ message: "Invalid Post ID format" });
-    }
+    const postId = Number(req.params.postId);
+    if (isNaN(postId)) return res.status(400).json({ message: "Invalid Post ID" });
 
-    // Cari post terlebih dahulu
     const post = await Post.findByPk(postId);
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
+    if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // Buat komentar baru
+    const { content } = req.body;
+    if (!content) return res.status(400).json({ message: "Comment content required" });
+
     const comment = await Comment.create({
-      content: req.body.content,
-      post_id: post.post_id,   // sesuai field di DB
-      user_id: req.user.user_id,
+      content,
+      post_id: post.post_id,
+      user_id: req.user.user_id
     });
 
-    res.status(201).json(comment);
+    const includeUser = await Comment.findByPk(comment.comment_id, {
+      include: [{ model: User, attributes: ["user_id", "username"] }]
+    });
 
+    res.json(includeUser);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error("POST /posts/:id/comments error:", err);
+    res.status(500).json({ message: "Failed to create comment" });
   }
 });
 

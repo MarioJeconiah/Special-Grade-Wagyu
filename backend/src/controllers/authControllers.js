@@ -4,7 +4,7 @@ import generateToken from "../utils/generateToken.js";
 
 export const register = async (req, res) => {
   // 1. Cek apakah request masuk
-  console.log("📨 Request Register Masuk:", req.body); 
+  console.log("Request Register Masuk:", req.body); 
 
   try {
     const { username, password } = req.body;
@@ -12,13 +12,13 @@ export const register = async (req, res) => {
     // ... kode validasi Anda ...
 
     // 2. Cek sebelum create user
-    console.log("⚙️ Mencoba membuat user di DB..."); 
+    console.log("Mencoba membuat user di DB..."); 
     
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ username, password: hashed });
 
     // 3. Cek setelah berhasil
-    console.log("✅ User berhasil dibuat:", user.user_id);
+    console.log("User berhasil dibuat:", user.user_id);
 
     return res.status(201).json({
       id: user.user_id,
@@ -27,7 +27,7 @@ export const register = async (req, res) => {
     });
   } catch (err) {
     // 4. Cek jika error
-    console.error("❌ ERROR Register:", err); 
+    console.error("ERROR Register:", err); 
     return res.status(500).json({ error: err.message });
   }
 };

@@ -113,7 +113,6 @@ export default function Register() {
 
       if (response.ok) {
         // Pendaftaran berhasil (status 201)
-        alert("Registration successful! Please login.");
         navigate("/login");
       } else {
         // Pendaftaran gagal (misalnya username sudah ada, atau error 500)
@@ -166,7 +165,7 @@ export default function Register() {
         {/* Tombol kembali ke login */}
         <button
           className="sign-in-btn"
-          style={{ marginTop: "12px", backgroundColor: "#6c6c6c" }}
+          style={{ marginTop: "12px"}}
           onClick={() => navigate("/login")}
         >
           Back to Login

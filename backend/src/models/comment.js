@@ -13,6 +13,14 @@ export default (sequelize, DataTypes) => {
             key: 'post_id' // Nama kolom Primary Key di model Post
         }
     },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "users",
+        key: "user_id"
+      }
+    },
     content: { type: DataTypes.TEXT, allowNull: false }
     // post_id akan ditangani oleh relasi di index.js
   }, {

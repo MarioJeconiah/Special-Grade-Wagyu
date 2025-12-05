@@ -29,10 +29,8 @@
 //     const protectedRoutes = ["/forum/create"];
 
 //     if (protectedRoutes.includes(location.pathname) && !user) {
-//       // PERBAIKAN: Menggunakan setter yang konsisten
 //       setShowLoginToCreatePopup(true); 
 //     } else {
-//       // PERBAIKAN: Menggunakan setter yang konsisten
 //       setShowLoginToCreatePopup(false);
 //     }
 //   }, [location, user]);
@@ -197,83 +195,70 @@
 // }
 
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { BrowserRouter, Routes, Route, NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  NavLink,
+  useLocation,
+  useNavigate
+} from "react-router-dom";
+
+import api from "./api/api";
 
 import Character from "./Pages/Character";
 import Weapon from "./Pages/Weapon";
 import TierList from "./Pages/TierList";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
-import Forum from "./Pages/Forum";
-import CreatePost from "./Pages/CreatePost";
-import Post from "./Pages/Post";
+
+import Posts from "./Pages/Posts";            
+import PostDetail from "./Pages/PostDetail";
 
 import "./App.css";
 
-// App utama
 function AppContent() {
   const [user, setUser] = useState(null);
-
-  // Posts sekarang dari backend
-  const [posts, setPosts] = useState([]);
-
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [showLoginToCreatePopup, setShowLoginToCreatePopup] = useState(false);
-  const [showLoginToForumPopup, setShowLoginToForumPopup] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [logoutPopup, setLogoutPopup] = useState(false);
 
-  // ----------------------------
-  //  FETCH POSTS FROM BACKEND
-  // ----------------------------
+  // Proteksi halaman /posts/create
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/forum")
-      .then((res) => {
-        setPosts(res.data || []);
-      })
-      .catch((err) => {
-        console.error("Error fetching posts:", err);
-      });
-  }, []);
-
-  // Cek akses /forum/create
-  useEffect(() => {
-    const protectedRoutes = ["/forum/create"];
-
-    if (protectedRoutes.includes(location.pathname) && !user) {
-      setShowLoginToCreatePopup(true);
-    } else {
-      setShowLoginToCreatePopup(false);
+    if (location.pathname === "/posts/create" && !user) {
+      setShowLoginPopup(true);
     }
   }, [location, user]);
 
-  const handleJoinForum = () => {
-    if (user) navigate("/forum");
-    else setShowLoginToForumPopup(true);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/");
   };
 
   return (
     <div>
-      {/* POPUP Create Post */}
-      {showLoginToCreatePopup && (
+
+      {/* POPUP LOGIN */}
+      {showLoginPopup && (
         <div className="forum-popup-overlay">
           <div className="forum-popup-box">
             <h2>Community Discussion</h2>
-            <p>You must Login to create a new post.</p>
+            <p>You must Login to create a post.</p>
 
             <NavLink
               to="/login"
               className="forum-popup-btn"
-              onClick={() => setShowLoginToCreatePopup(false)}
+              onClick={() => setShowLoginPopup(false)}
             >
               Go to Login
             </NavLink>
 
             <button
               className="forum-popup-close"
-              onClick={() => navigate("/forum")}
+              onClick={() => navigate("/posts")}
             >
               ×
             </button>
@@ -281,30 +266,35 @@ function AppContent() {
         </div>
       )}
 
-      {/* POPUP Forum Access */}
-      {showLoginToForumPopup && (
+      {logoutPopup && (
         <div className="forum-popup-overlay">
           <div className="forum-popup-box">
-            <h2>Community Discussion</h2>
-            <p>You need to Login to join the discussion.</p>
+            <h2>Logout</h2>
+            <p>Are you sure you want to logout?</p>
 
-            <NavLink
-              to="/login"
+            <button
               className="forum-popup-btn"
-              onClick={() => setShowLoginToForumPopup(false)}
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                localStorage.removeItem("token");
+                setUser(null);
+                setLogoutPopup(false);
+                navigate("/");
+              }}
             >
-              Login
-            </NavLink>
+              Yes, Logout
+            </button>
 
             <button
               className="forum-popup-close"
-              onClick={() => setShowLoginToForumPopup(false)}
+              onClick={() => setLogoutPopup(false)}
             >
-              ×
+              X
             </button>
           </div>
         </div>
       )}
+
 
       {/* NAVBAR */}
       <nav className="navbar">
@@ -322,13 +312,20 @@ function AppContent() {
           {!user ? (
             <NavLink to="/login" className="login-btn">LOGIN</NavLink>
           ) : (
-            <span className="login-btn">{user.username}</span>
+            <span
+              className="login-btn"
+              style={{ cursor: "pointer" }}
+              onClick={() => setLogoutPopup(true)}
+            >
+              {user.username}
+            </span>
           )}
         </ul>
       </nav>
 
       {/* ROUTES */}
       <Routes>
+        {/* HOME */}
         <Route
           path="/"
           element={
@@ -340,26 +337,26 @@ function AppContent() {
               </div>
 
               <section className="content-box forum-section">
-                <button className="tierlist-btn" onClick={handleJoinForum}>
-                  Join Community Discussion
-                </button>
+                <NavLink to="/posts" className="tierlist-btn">
+                  Community Posts
+                </NavLink>
               </section>
             </main>
           }
         />
 
+        {/* NORMAL PAGES */}
         <Route path="/character" element={<Character />} />
         <Route path="/weapon" element={<Weapon />} />
         <Route path="/tierlist" element={<TierList />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
 
-        <Route path="/forum" element={<Forum posts={posts} />} />
-        <Route path="/forum/create" element={<CreatePost posts={posts} setPosts={setPosts} user={user} />} />
-        <Route path="/forum/post/:id" element={<Post posts={posts} user={user} setPosts={setPosts} />} />
+        {/* POSTS SYSTEM */}
+        <Route path="/posts" element={<Posts user={user} />} />
+        <Route path="/posts/:postId" element={<PostDetail user={user} />} />
       </Routes>
 
-      {/* FOOTER */}
       <footer className="solid-section">
         <p>Welcome to the Genshin Impact Wiki Fandom!</p>
       </footer>
@@ -374,3 +371,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

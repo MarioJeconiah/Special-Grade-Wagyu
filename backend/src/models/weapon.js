@@ -9,7 +9,7 @@ export default (sequelize, DataTypes) => {
     type: { type: DataTypes.STRING(30), allowNull: false }, // Sesuai SQL
     rarity: { type: DataTypes.INTEGER, allowNull: false },
     image: { type: DataTypes.TEXT },
-    desc: {type: DataTypes.TEXT}
+    description: {type: DataTypes.TEXT}
   }, {
     tableName: 'weapon_list',
     timestamps: false

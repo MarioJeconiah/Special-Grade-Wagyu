@@ -155,23 +155,26 @@
 // export default Weapon;
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 
 function Weapon() {
   const [weapons, setWeapons] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/weapons")
-      .then((res) => {
+    const fetchWeapons = async () => {
+      try {
+        const res = await api.get("/weapons");
+        console.log("🔥 DATA FROM BACKEND:", res.data);
         setWeapons(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to load weapons:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchWeapons();
   }, []);
 
   return (
@@ -179,9 +182,8 @@ function Weapon() {
       <div className="content-box" style={{ marginTop: "6rem" }}>
         <h1>Genshin Impact Weapons</h1>
         <p>
-          Weapons in <strong>Genshin Impact</strong> define a character’s fighting style.
-          Each has unique passive abilities and ascension materials. Here’s a look at some
-          of the most iconic weapons across Teyvat.
+          Weapons in <strong>Genshin Impact</strong> define each character’s
+          fighting style.
         </p>
 
         {loading ? (
@@ -198,48 +200,65 @@ function Weapon() {
               marginTop: "2rem",
             }}
           >
-            {weapons.map((w) => (
-              <div
-                key={w.weapon_id}
-                className="weapon-card"
-                style={{
-                  backgroundColor: "rgba(0,0,0,0.6)",
-                  borderRadius: "10px",
-                  padding: "1rem",
-                  width: "250px",
-                  textAlign: "center",
-                  color: "white",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
-                  transition:
-                    "transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease",
-                  cursor: "pointer",
-                }}
-              >
-                <img
-                  src={w.image}
-                  alt={w.name}
-                  className="weapon-img"
+            {weapons.map((w, idx) => {
+              const id = w.weapon_id || idx;
+
+              const name = w.name || "Unknown Weapon";
+              const type = w.type || "Unknown";
+              const rarity = w.rarity || 5;
+
+              const image = w.image || w.image_url || "";
+
+              // ✅ FIX: description fallback
+              const description =
+              w.description 
+              ||
+              "No description available.";
+
+              return (
+                <div
+                  key={id}
+                  className="weapon-card"
                   style={{
-                    width: "100%",
-                    height: "150px",
-                    objectFit: "contain",
-                    borderRadius: "8px",
-                    marginBottom: "1rem",
-                    transition: "transform 0.3s ease",
+                    backgroundColor: "rgba(0,0,0,0.6)",
+                    borderRadius: "10px",
+                    padding: "1rem",
+                    width: "250px",
+                    textAlign: "center",
+                    color: "white",
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+                    transition:
+                      "transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease",
+                    cursor: "pointer",
                   }}
-                />
+                >
+                  <img
+                    src={image}
+                    alt={name}
+                    className="weapon-img"
+                    style={{
+                      width: "100%",
+                      height: "150px",
+                      objectFit: "contain",
+                      borderRadius: "8px",
+                      marginBottom: "1rem",
+                      transition: "transform 0.3s ease",
+                    }}
+                  />
 
-                <h3>{w.name}</h3>
+                  <h3>{name}</h3>
 
-                <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.8)" }}>
-                  {w.type} • ⭐{w.rarity}
-                </p>
+                  <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.8)" }}>
+                    {type} • ⭐{rarity}
+                  </p>
 
-                <p style={{ fontSize: "0.85rem", marginTop: "0.5rem" }}>
-                  {w.desc}
-                </p>
-              </div>
-            ))}
+                  {/* ✅ DESCRIPTION FIXED HERE */}
+                  <p style={{ fontSize: "0.85rem", marginTop: "0.5rem" }}>
+                    {description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

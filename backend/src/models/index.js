@@ -1,11 +1,11 @@
 import { Sequelize, DataTypes } from "sequelize";
 import dotenv from "dotenv";
+
 import userModel from "./user.js";
 import characterModel from "./character.js";
 import weaponModel from "./weapon.js";
 import postModel from "./post.js";
 import commentModel from "./comment.js";
-import elementModel from "./elements.js";
 
 dotenv.config();
 
@@ -25,27 +25,28 @@ export const Character = characterModel(sequelize, DataTypes);
 export const Weapon = weaponModel(sequelize, DataTypes);
 export const Post = postModel(sequelize, DataTypes);
 export const Comment = commentModel(sequelize, DataTypes);
-export const Element = elementModel(sequelize, DataTypes);
 
-// Relasi
-// Note: Sequelize akan otomatis menambahkan kolom user_id ke Post jika belum ada
+// ---- User ↔ Post ----
 User.hasMany(Post, { foreignKey: "user_id" });
 Post.belongsTo(User, { foreignKey: "user_id" });
 
-Post.hasMany(Comment, {
-    foreignKey: 'post_id',
-    onDelete: 'CASCADE' // Pilihan: Jika Post dihapus, semua Comment ikut terhapus
-});
-
+// ---- User ↔ Comment ----
 User.hasMany(Comment, { foreignKey: "user_id" });
 Comment.belongsTo(User, { foreignKey: "user_id" });
 
-Element.hasMany(Character, {
-  foreignKey: "element_id"
+// ---- Post ↔ Comment ----
+Post.hasMany(Comment, {
+  foreignKey: "post_id",
+  onDelete: "CASCADE"
 });
+Comment.belongsTo(Post, { foreignKey: "post_id" });
 
-Character.belongsTo(Element, {
-  foreignKey: "element_id"
-});
 
-export default { sequelize, User, Character, Weapon, Post, Comment, Element};
+export default {
+  sequelize,
+  User,
+  Character,
+  Weapon,
+  Post,
+  Comment,
+};

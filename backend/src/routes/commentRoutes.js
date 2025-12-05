@@ -1,8 +1,8 @@
-import express from "express";
-import { Comment, Post } from "../models/index.js";
-import { protect } from "../middleware/authMiddleware.js";
+// import express from "express";
+// import { Comment, Post } from "../models/index.js";
+// import { protect } from "../middleware/authMiddleware.js";
 
-const router = express.Router();
+// const router = express.Router();
 
 // --- FITUR AKTIF: CREATE COMMENT ---
 // router.post("/:postId", protect, async (req, res) => {
@@ -29,49 +29,48 @@ const router = express.Router();
 
 
 
+// backend/src/routes/commentRoutes.js
+import express from "express";
+import db from "../models/index.js";
+
+const { Comment } = db;
+import { protect } from "../middleware/authMiddleware.js";
+const router = express.Router();
+
 router.put("/:commentId", protect, async (req, res) => {
   try {
-    // 💡 Perbaikan: Konversi commentId ke integer
     const commentId = parseInt(req.params.commentId, 10);
-    if (isNaN(commentId)) {
-        return res.status(400).json({ message: "Invalid Comment ID format" });
-    }
+    if (isNaN(commentId)) return res.status(400).json({ message: "Invalid Comment ID" });
 
-    const comment = await Comment.findByPk(commentId); // Gunakan commentId yang sudah di-parse
+    const comment = await Comment.findByPk(commentId);
     if (!comment) return res.status(404).json({ message: "Comment not found" });
 
-    if (comment.user_id !== req.user.user_id) {
-        return res.status(403).json({ message: "Not allowed: Not your comment" });
-    }
+    if (comment.user_id !== req.user.user_id) return res.status(403).json({ message: "Not allowed: Not your comment" });
 
     await comment.update({ content: req.body.content });
     res.json(comment);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
 router.delete("/:commentId", protect, async (req, res) => {
   try {
-    // 💡 Perbaikan: Konversi commentId ke integer
     const commentId = parseInt(req.params.commentId, 10);
-    if (isNaN(commentId)) {
-        return res.status(400).json({ message: "Invalid Comment ID format" });
-    }
+    if (isNaN(commentId)) return res.status(400).json({ message: "Invalid Comment ID" });
 
-    const comment = await Comment.findByPk(commentId); // Gunakan commentId yang sudah di-parse
+    const comment = await Comment.findByPk(commentId);
     if (!comment) return res.status(404).json({ message: "Comment not found" });
 
-    if (comment.user_id !== req.user.user_id) {
-      return res.status(403).json({ message: "Not allowed" });
-    }
+    if (comment.user_id !== req.user.user_id) return res.status(403).json({ message: "Not allowed" });
 
     await comment.destroy();
     res.json({ message: "Comment deleted" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
- }
+  }
 });
-
 
 export default router;

@@ -1,14 +1,24 @@
 import axios from "axios";
 
-const API = axios.create({
+const api = axios.create({
   baseURL: "http://localhost:4000/api",
+  withCredentials: false,
 });
 
-// Kirim token jika ada
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  if (token) req.headers.Authorization = `Bearer ${token}`;
-  return req;
-});
+// Tambahkan token otomatis dari localStorage (Bearer)
+api.interceptors.request.use(
+  (config) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-export default API;
+export default api;
